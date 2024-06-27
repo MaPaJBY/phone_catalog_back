@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import orderService from "../services/order.services";
 import { handleErrors } from "../utils/handleErrors";
-import { OrderProduct } from "../utils/types";
 
 const getAllOrders = async (req: Request, res: Response) => {
   try {
@@ -12,35 +11,36 @@ const getAllOrders = async (req: Request, res: Response) => {
   }
 };
 
+
 const getOrderById = async (req: Request, res: Response) => {
   try {
-    const orderId = parseInt(req.params.id, 10);
+    const { orderId } = req.params;
     const order = await orderService.getOrderById(orderId);
-
-    if (!order) {
+    if (order) {
+      res.json(order);
+    } else {
       res.status(404).json({
         errType: "404",
-        msg: "Order not found",
+        msg: "Order not found"
       });
-      return;
     }
-
-    res.json(order);
   } catch (error) {
     handleErrors(res, error);
   }
 };
 
 const createOrder = async (req: Request, res: Response) => {
-  try {
-    const { userId, products } = req.body;
-    
-    const totalAmount = products.reduce((sum: number, product: OrderProduct) => {
-      return sum + (product.price * product.quantity);
-    }, 0);
+  const { id, productId, userId, quantity, price, status } = req.body;
 
-    const newOrder = await orderService.createOrder({ userId, totalAmount, products });
-    res.status(201).json(newOrder);
+  if (!id || !productId || !userId || !quantity || !price || !status) {
+    return res.status(400).json({
+      errType: "400",
+      msg: "All fields are required: id, productId, userId, quantity, price, status"
+    });
+  }
+  try {
+    const order = await orderService.createOrder(req.body);
+    res.status(201).json(order);
   } catch (error) {
     handleErrors(res, error);
   }
@@ -48,23 +48,16 @@ const createOrder = async (req: Request, res: Response) => {
 
 const updateOrder = async (req: Request, res: Response) => {
   try {
-    const orderId = parseInt(req.params.id, 10);
-    const { userId, totalAmount, products } = req.body;
-    const updatedOrder = await orderService.updateOrder(orderId, {
-      userId,
-      totalAmount,
-      products,
-    });
-
-    if (!updatedOrder) {
+    const { orderId } = req.params;
+    const order = await orderService.updateOrder(orderId, req.body);
+    if (order) {
+      res.json(order);
+    } else {
       res.status(404).json({
         errType: "404",
         msg: "Order not found",
       });
-      return;
     }
-
-    res.json(updatedOrder);
   } catch (error) {
     handleErrors(res, error);
   }
@@ -72,9 +65,16 @@ const updateOrder = async (req: Request, res: Response) => {
 
 const deleteOrder = async (req: Request, res: Response) => {
   try {
-    const orderId = parseInt(req.params.id, 10);
-    await orderService.deleteOrder(orderId);
-    res.status(204).end();
+    const { orderId } = req.params;
+    const order = await orderService.deleteOrder(orderId);
+    if (order) {
+      res.json(order);
+    } else {
+      res.status(404).json({
+        errType: "404",
+        msg: "Order not found",
+      });
+    }
   } catch (error) {
     handleErrors(res, error);
   }

@@ -1,37 +1,51 @@
 import { Model, Sequelize, DataTypes } from "sequelize";
-import { OrderProduct } from "../utils/types";
 
-class Order extends Model {
-  public id!: number;
+export class Order extends Model {
+  public id!: string;
+  public productId!: string;
   public userId!: string;
-  public totalAmount!: number;
-  public products!: OrderProduct[];
+  public quantity!: number;
+  public price!: number;
+  public status!: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
 
-  static initialize(sequelize: Sequelize): void {
-    this.init({
+export const orderMap = (sequelize: Sequelize): void => {
+  Order.init(
+    {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
+        allowNull: false,
         primaryKey: true,
-        autoIncrement: true,
+      },
+      productId: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
       userId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      totalAmount: {
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      price: {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
-      products: {
-        type: DataTypes.JSON,
+      status: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
-    }, {
+    },
+    {
       sequelize,
-      modelName: 'Order',
-      tableName: 'Orders',
-    });
-  }
-}
+      modelName: "Order",
+      tableName: "orders",
+    }
+  );
+};
 
 export default Order;

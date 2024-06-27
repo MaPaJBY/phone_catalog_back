@@ -1,46 +1,60 @@
-import Order from '../models/order';
-import { OrderProduct } from '../utils/types';
+import Order from "../models/order";
+import { OrderAttributes, OrderWithTotalPrice } from "../utils/types";
 
-const getAllOrders = async (): Promise<Order[]> => {
-  return Order.findAll();
+const calculateTotalPrice = (quantity: number, price: number): number => {
+  return quantity * price;
 };
 
-const getOrderById = async (orderId: number): Promise<Order | null> => {
-  return Order.findByPk(orderId);
+const getAllOrders = async (): Promise<OrderWithTotalPrice[]> => {
+  const orders = await Order.findAll();
+  const ordersWithTotalPrice = orders.map(order => ({
+    ...order.toJSON(),
+    totalPrice: calculateTotalPrice(order.quantity, order.price),
+  }));
+  return ordersWithTotalPrice;
 };
 
-const createOrder = async (orderData: {
-  userId: string;
-  totalAmount: number;
-  products: OrderProduct[];
-}): Promise<Order> => {
-  return Order.create(orderData);
-};
-
-const updateOrder = async (
-  orderId: number,
-  orderData: Partial<{
-    userId: string;
-    totalAmount: number;
-    products: string;
-  }>
-): Promise<Order | null> => {
+const getOrderById = async (orderId: string): Promise<OrderWithTotalPrice | null> => {
   const order = await Order.findByPk(orderId);
-  if (!order) {
-    return null;
+  if (order) {
+    const totalPrice = calculateTotalPrice(order.quantity, order.price);
+    return {
+      ...order.toJSON(),
+      totalPrice,
+    } as OrderWithTotalPrice; 
   }
-
-  return order.update(orderData);
+  return null;
 };
 
-const deleteOrder = async (orderId: number) => {
-  const order = await Order.findByPk(orderId);
-  if (!order) {
-    return false;
-  }
+const createOrder = async (orderData: Partial<OrderAttributes>): Promise<OrderWithTotalPrice> => {
+  const order = await Order.create(orderData);
+  const totalPrice = calculateTotalPrice(order.quantity, order.price);
+  return {
+    ...order.toJSON(),
+    totalPrice,
+  } as OrderWithTotalPrice;
+};
 
-  await order.destroy();
-  return true;
+const updateOrder = async (orderId: string, updatedOrder: Partial<OrderAttributes>): Promise<OrderWithTotalPrice | null> => {
+  const order = await Order.findByPk(orderId);
+  if (order) {
+    await order.update(updatedOrder);
+    const totalPrice = calculateTotalPrice(order.quantity, order.price);
+    return {
+      ...order.toJSON(),
+      totalPrice,
+    } as OrderWithTotalPrice;
+  }
+  return null;
+};
+
+const deleteOrder = async (orderId: string): Promise<Order | null> => {
+  const order = await Order.findByPk(orderId);
+  if (order) {
+    await order.destroy();
+    return order as Order;
+  }
+  return null;
 };
 
 const orderService = {

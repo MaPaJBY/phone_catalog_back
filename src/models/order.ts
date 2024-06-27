@@ -43,7 +43,7 @@ export const orderMap = (sequelize: Sequelize): void => {
     {
       sequelize,
       modelName: "Order",
-      tableName: "orders",
+      tableName: "Orders",
     }
   );
 };

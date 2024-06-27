@@ -8,25 +8,12 @@ export interface OrderItem {
 }
 
 export enum SortType {
-  AZ = "az",
-  ZA = "za",
-  LOW_TO_HIGH = "lowToHigh",
-  HIGH_TO_LOW = "highToLow",
-  WITHOUT_SORT = "without-sort",
-  SHOW_ALL = "show-all",
-  NEWEST_TO_OLDEST = "newest-to-oldest",
-  OLDEST_TO_NEWEST = "oldest-to-newest",
-}
-
-export interface OrderAttributes {
-  id: string;
-  productId: string;
-  userId: string;
-  quantity: number;
-  price: number;
-  status: string;
-}
-
-export interface OrderWithTotalPrice extends OrderAttributes {
-  totalPrice: number;
+  AZ = 'az',
+  ZA = 'za',
+  LOW_TO_HIGH = 'lowToHigh',
+  HIGH_TO_LOW = 'highToLow',
+  WITHOUT_SORT = 'without-sort',
+  SHOW_ALL = 'show-all',
+  NEWEST_TO_OLDEST = 'newest-to-oldest',
+  OLDEST_TO_NEWEST = 'oldest-to-newest',
 }
